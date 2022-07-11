@@ -37,6 +37,8 @@ function evalInContext(script: string, context: Scope) {
 		for (const k in this) {
 			prefix += `let ${k}=this['${k}'];`;
 		}
+		// eslint-disable-next-line no-console
+		console.log('[Eval:JS] ' + prefix + str);
 		return eval(prefix + str);
 	}.call(context, script);
 }

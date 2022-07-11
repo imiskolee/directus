@@ -75,6 +75,7 @@
 		"npm": "8.10.0"
 	},
 	"dependencies": {
-		"eslint-plugin-jest": "^26.5.3"
+		"eslint-plugin-jest": "^26.5.3",
+		"highlight.js": "^11.5.1"
 	}
 }
