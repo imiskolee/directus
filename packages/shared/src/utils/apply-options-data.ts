@@ -12,7 +12,7 @@ export function applyOptionsData(
 	return Object.fromEntries(
 		Object.entries(options).map(([key, value]) => {
 			if (typeof value === 'string') {
-				const single = value.match(/^\{\{\s*([^}\s]+)\s*\}\}$/);
+				const single = value.match(/^\{\{\s*([^}]+)\s*\}\}$/);
 
 				if (single !== null && single.length > 0) {
 					const foundValue = get(data, single[1]!);
