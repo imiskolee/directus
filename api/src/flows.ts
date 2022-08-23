@@ -142,7 +142,7 @@ class FlowManager {
 
 		for (const flow of flowTrees) {
 			if (flow.trigger === 'event') {
-				const events: string[] =
+				let events: string[] =
 					toArray(flow.options?.scope)
 						?.map((scope: string) => {
 							if (['items.create', 'items.update', 'items.delete'].includes(scope)) {
@@ -161,7 +161,9 @@ class FlowManager {
 							return scope;
 						})
 						?.flat() ?? [];
-
+				if (!events) {
+					events = [];
+				}
 				if (flow.options.type === 'filter') {
 					const handler: FilterHandler = (payload, meta, context) =>
 						this.executeFlow(
