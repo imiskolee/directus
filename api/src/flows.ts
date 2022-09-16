@@ -142,25 +142,27 @@ class FlowManager {
 
 		for (const flow of flowTrees) {
 			if (flow.trigger === 'event') {
-				let events: string[] =
-					toArray(flow.options?.scope)
-						?.map((scope: string) => {
-							if (['items.create', 'items.update', 'items.delete'].includes(scope)) {
-								return (
-									flow.options?.collections?.map((collection: string) => {
-										if (collection.startsWith('directus_')) {
-											const action = scope.split('.')[1];
-											return collection.substring(9) + '.' + action;
-										}
+				let events: string[] = flow.options?.scope
+					? toArray(flow.options.scope)
+							.map((scope: string) => {
+								if (['items.create', 'items.update', 'items.delete'].includes(scope)) {
+									return (
+										flow.options?.collections?.map((collection: string) => {
+											if (collection.startsWith('directus_')) {
+												const action = scope.split('.')[1];
+												return collection.substring(9) + '.' + action;
+											}
 
-										return `${collection}.${scope}`;
-									}) ?? []
-								);
-							}
+											return `${collection}.${scope}`;
+										}) ?? []
+									);
+								}
 
-							return scope;
-						})
-						?.flat() ?? [];
+								return scope;
+							})
+							.flat()
+					: [];
+
 				if (!events) {
 					events = [];
 				}
@@ -300,6 +302,7 @@ class FlowManager {
 		};
 
 		let nextOperation = flow.operation;
+		let lastOperationStatus: 'resolve' | 'reject' | 'unknown' = 'unknown';
 
 		const steps: {
 			operation: string;
@@ -313,6 +316,7 @@ class FlowManager {
 
 			keyedData[nextOperation.key] = data;
 			keyedData[LAST_KEY] = data;
+			lastOperationStatus = status;
 			steps.push({ operation: nextOperation!.id, key: nextOperation.key, status, options });
 
 			nextOperation = successor;
@@ -332,6 +336,7 @@ class FlowManager {
 				collection: 'directus_flows',
 				ip: accountability?.ip ?? null,
 				user_agent: accountability?.userAgent ?? null,
+				origin: accountability?.origin ?? null,
 				item: flow.id,
 			});
 
@@ -351,6 +356,10 @@ class FlowManager {
 					},
 				});
 			}
+		}
+
+		if (flow.trigger === 'event' && flow.options.type === 'filter' && lastOperationStatus === 'reject') {
+			throw keyedData[LAST_KEY];
 		}
 
 		if (flow.options.return === '$all') {
