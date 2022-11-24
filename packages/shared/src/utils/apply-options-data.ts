@@ -36,9 +36,8 @@ function evalInContext(script: string, context: Scope) {
 
 function resolveFn(skipUndefined: boolean): (path: string, scope: Scope) => any {
 	return (path, scope) => {
-		const value = get(scope, path);
+		let value = get(scope, path);
 		const single = path.match(/^Eval\((\s*(.*?)\s*)\)$/);
-		let value;
 		if (single !== null && single.length > 0) {
 			value = evalInContext(single[1] || '', scope);
 		} else {
